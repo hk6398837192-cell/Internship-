@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stopwatch {
+            background: #1e293b;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 350px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-size: 30px;
+            color: #38bdf8;
+        }
+
+        #display {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        #start {
+            background: #22c55e;
+            color: white;
+        }
+
+        #pause {
+            background: #f59e0b;
+            color: white;
+        }
+
+        #reset {
+            background: #ef4444;
+            color: white;
+        }
+
+        #lap {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+
+        #laps {
+            margin-top: 25px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        #laps h3 {
+            margin-bottom: 10px;
+            color: #38bdf8;
+        }
+
+        #laps li {
+            list-style: none;
+            padding: 8px;
+            border-bottom: 1px solid #475569;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="stopwatch">
+        <h1>Stopwatch</h1>
+
+        <div id="display">00:00:00.00</div>
+
+        <div class="buttons">
+            <button id="start">Start</button>
+            <button id="pause">Pause</button>
+            <button id="reset">Reset</button>
+            <button id="lap">Lap</button>
+        </div>
+
+        <div id="laps">
+            <h3>Lap Times</h3>
+            <ul id="lapList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById("display");
+        const startBtn = document.getElementById("start");
+        const pauseBtn = document.getElementById("pause");
+        const resetBtn = document.getElementById("reset");
+        const lapBtn = document.getElementById("lap");
+        const lapList = document.getElementById("lapList");
+
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timer = null;
+
+        function formatTime(time) {
+            const hours = Math.floor(time / 3600000);
+            const minutes = Math.floor((time % 3600000) / 60000);
+            const seconds = Math.floor((time % 60000) / 1000);
+            const milliseconds = Math.floor((time % 1000) / 10);
+
+            return (
+                String(hours).padStart(2, "0") + ":" +
+                String(minutes).padStart(2, "0") + ":" +
+                String(seconds).padStart(2, "0") + "." +
+                String(milliseconds).padStart(2, "0")
+            );
+        }
+
+        function updateDisplay() {
+            const currentTime =
+                elapsedTime + (performance.now() - startTime);
+
+            display.textContent = formatTime(currentTime);
+        }
+
+        startBtn.addEventListener("click", function () {
+            if (timer !== null) return;
+
+            startTime = performance.now();
+            timer = setInterval(updateDisplay, 10);
+        });
+
+        pauseBtn.addEventListener("click", function () {
+            if (timer === null) return;
+
+            elapsedTime += performance.now() - startTime;
+            clearInterval(timer);
+            timer = null;
+            updateDisplay();
+        });
+
+        resetBtn.addEventListener("click", function () {
+            clearInterval(timer);
+            timer = null;
+            startTime = 0;
+            elapsedTime = 0;
+            display.textContent = "00:00:00.00";
+            lapList.innerHTML = "";
+        });
+
+        lapBtn.addEventListener("click", function () {
+            if (timer === null && elapsedTime === 0) return;
+
+            const currentTime = timer !== null
+                ? elapsedTime + (performance.now() - startTime)
+                : elapsedTime;
+
+            const li = document.createElement("li");
+            li.textContent =
+                "Lap " + (lapList.children.length + 1) +
+                " — " + formatTime(currentTime);
+
+            lapList.prepend(li);
+        });
+    </script>
+
+</body>
+</html>
